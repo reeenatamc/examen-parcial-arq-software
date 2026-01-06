@@ -1,0 +1,68 @@
+{% extends 'proj/base.html' %}
+
+{% block title %}Logísticas - Sistema de Trazabilidad{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1 class="mb-2">Logísticas</h1>
+                <p class="text-muted mb-0">Registros de transporte y entrega al supermercado</p>
+            </div>
+            <a href="{% url 'crear_logistica' %}" class="btn btn-info">
+                <i class="bi bi-plus-circle"></i> Nueva Logística
+            </a>
+        </div>
+
+        {% if logisticas %}
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Número de Guía</th>
+                            <th>Lote</th>
+                            <th>Destino</th>
+                            <th>Fecha Salida</th>
+                            <th>Fecha Entrega</th>
+                            <th>Temp. Min</th>
+                            <th>Temp. Max</th>
+                            <th>Temp. Prom</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for log in logisticas %}
+                            <tr>
+                                <td><strong>{{ log.numero_guia }}</strong></td>
+                                <td>{{ log.transformacion.lote.codigo_lote }}</td>
+                                <td>{{ log.destino }}</td>
+                                <td>{{ log.fecha_salida|date:"d/m/Y H:i" }}</td>
+                                <td>{{ log.fecha_entrega|date:"d/m/Y H:i" }}</td>
+                                <td>{{ log.temperatura_minima }}°C</td>
+                                <td>{{ log.temperatura_maxima }}°C</td>
+                                <td><strong>{{ log.temperatura_promedio }}°C</strong></td>
+                                <td>
+                                    <span class="badge 
+                                        {% if log.estado == 'ENTREGADO' %}bg-success
+                                        {% elif log.estado == 'RETRASADO' %}bg-danger
+                                        {% else %}bg-info
+                                        {% endif %}">
+                                        {{ log.get_estado_display }}
+                                    </span>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle"></i> No hay logísticas registradas.
+                <a href="{% url 'crear_logistica' %}">Crear el primer registro logístico</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+

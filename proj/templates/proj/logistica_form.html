@@ -1,0 +1,131 @@
+{% extends 'proj/base.html' %}
+
+{% block title %}{{ titulo }} - Sistema de Trazabilidad{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-truck"></i> {{ titulo }}
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <h5 class="mb-3">Información General</h5>
+                    <div class="mb-3">
+                        <label for="{{ form.transformacion.id_for_label }}" class="form-label">{{ form.transformacion.label }}</label>
+                        {{ form.transformacion }}
+                        {% if form.transformacion.errors %}
+                            <div class="text-danger small">{{ form.transformacion.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.numero_guia.id_for_label }}" class="form-label">{{ form.numero_guia.label }}</label>
+                            {{ form.numero_guia }}
+                            {% if form.numero_guia.errors %}
+                                <div class="text-danger small">{{ form.numero_guia.errors }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label for="{{ form.vehiculo.id_for_label }}" class="form-label">{{ form.vehiculo.label }}</label>
+                            {{ form.vehiculo }}
+                            {% if form.vehiculo.errors %}
+                                <div class="text-danger small">{{ form.vehiculo.errors }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label for="{{ form.conductor.id_for_label }}" class="form-label">{{ form.conductor.label }}</label>
+                            {{ form.conductor }}
+                            {% if form.conductor.errors %}
+                                <div class="text-danger small">{{ form.conductor.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <hr>
+                    <h5 class="mb-3">Registro de Temperatura durante el Transporte</h5>
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i> Las temperaturas deben estar entre 2°C y 8°C para productos orgánicos.
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="{{ form.temperatura_minima.id_for_label }}" class="form-label">{{ form.temperatura_minima.label }}</label>
+                            {{ form.temperatura_minima }}
+                            {% if form.temperatura_minima.errors %}
+                                <div class="text-danger small">{{ form.temperatura_minima.errors }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="{{ form.temperatura_maxima.id_for_label }}" class="form-label">{{ form.temperatura_maxima.label }}</label>
+                            {{ form.temperatura_maxima }}
+                            {% if form.temperatura_maxima.errors %}
+                                <div class="text-danger small">{{ form.temperatura_maxima.errors }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="{{ form.temperatura_promedio.id_for_label }}" class="form-label">{{ form.temperatura_promedio.label }}</label>
+                            {{ form.temperatura_promedio }}
+                            {% if form.temperatura_promedio.errors %}
+                                <div class="text-danger small">{{ form.temperatura_promedio.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <hr>
+                    <h5 class="mb-3">Fechas de Transporte</h5>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.fecha_salida.id_for_label }}" class="form-label">{{ form.fecha_salida.label }}</label>
+                            {{ form.fecha_salida }}
+                            {% if form.fecha_salida.errors %}
+                                <div class="text-danger small">{{ form.fecha_salida.errors }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.fecha_entrega.id_for_label }}" class="form-label">{{ form.fecha_entrega.label }}</label>
+                            {{ form.fecha_entrega }}
+                            {% if form.fecha_entrega.errors %}
+                                <div class="text-danger small">{{ form.fecha_entrega.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <hr>
+                    <h5 class="mb-3">Destino</h5>
+                    <div class="mb-3">
+                        <label for="{{ form.destino.id_for_label }}" class="form-label">{{ form.destino.label }}</label>
+                        {{ form.destino }}
+                        {% if form.destino.errors %}
+                            <div class="text-danger small">{{ form.destino.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.direccion_destino.id_for_label }}" class="form-label">{{ form.direccion_destino.label }}</label>
+                        {{ form.direccion_destino }}
+                        {% if form.direccion_destino.errors %}
+                            <div class="text-danger small">{{ form.direccion_destino.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.estado.id_for_label }}" class="form-label">{{ form.estado.label }}</label>
+                        {{ form.estado }}
+                        {% if form.estado.errors %}
+                            <div class="text-danger small">{{ form.estado.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{% url 'lista_logisticas' %}" class="btn btn-secondary">Cancelar</a>
+                        <button type="submit" class="btn btn-primary">{{ accion }}</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

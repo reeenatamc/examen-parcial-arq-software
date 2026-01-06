@@ -1,0 +1,212 @@
+{% extends 'proj/base.html' %}
+
+{% block title %}Trazabilidad Completa - {{ lote.codigo_lote }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="mb-4">
+            <h1 class="mb-2"><i class="bi bi-diagram-3"></i> Trazabilidad Completa</h1>
+            <p class="text-muted mb-0">Lote: <strong>{{ lote.codigo_lote }}</strong></p>
+        </div>
+
+        {% if errores_validacion %}
+            <div class="alert alert-danger">
+                <h5><i class="bi bi-exclamation-triangle"></i> Errores de Validación:</h5>
+                <ul>
+                    {% for error in errores_validacion %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+
+        <!-- Diagrama de Flujo -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="bi bi-diagram-3"></i> Flujo de Trazabilidad
+            </div>
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-3 mb-3 mb-md-0">
+                        <div class="card border-primary" style="border-width: 2px;">
+                            <div class="card-body text-center">
+                                <div class="mb-3">
+                                    <i class="bi bi-seedling text-primary" style="font-size: 3rem;"></i>
+                                </div>
+                                <h5 class="mb-2">1. Origen</h5>
+                                <p class="text-muted mb-0 small">Lote de Cultivo</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-1 text-center d-none d-md-block">
+                        <i class="bi bi-arrow-right text-muted" style="font-size: 2rem;"></i>
+                    </div>
+                    <div class="col-12 d-md-none text-center my-2">
+                        <i class="bi bi-arrow-down text-muted" style="font-size: 2rem;"></i>
+                    </div>
+                    <div class="col-md-3 mb-3 mb-md-0">
+                        <div class="card border-warning" style="border-width: 2px;">
+                            <div class="card-body text-center">
+                                <div class="mb-3">
+                                    <i class="bi bi-gear text-warning" style="font-size: 3rem;"></i>
+                                </div>
+                                <h5 class="mb-2">2. Transformación</h5>
+                                <p class="text-muted mb-0 small">Lavado, Empaquetado, Calidad</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-1 text-center d-none d-md-block">
+                        <i class="bi bi-arrow-right text-muted" style="font-size: 2rem;"></i>
+                    </div>
+                    <div class="col-12 d-md-none text-center my-2">
+                        <i class="bi bi-arrow-down text-muted" style="font-size: 2rem;"></i>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card border-info" style="border-width: 2px;">
+                            <div class="card-body text-center">
+                                <div class="mb-3">
+                                    <i class="bi bi-truck text-info" style="font-size: 3rem;"></i>
+                                </div>
+                                <h5 class="mb-2">3. Logística</h5>
+                                <p class="text-muted mb-0 small">Transporte y Entrega</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Origen: Lote de Cultivo -->
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <i class="bi bi-seedling"></i> 1. ORIGEN - Lote de Cultivo
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Código del Lote:</strong> {{ lote.codigo_lote }}</p>
+                        <p><strong>Tipo de Producto:</strong> {{ lote.tipo_producto }}</p>
+                        <p><strong>Ubicación:</strong> {{ lote.ubicacion }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Área:</strong> {{ lote.area_hectareas }} hectáreas</p>
+                        <p><strong>Fecha de Cosecha:</strong> {{ lote.fecha_cosecha }}</p>
+                        <p><strong>Responsable:</strong> {{ lote.responsable }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Transformación -->
+        {% if transformaciones %}
+            {% for transformacion in transformaciones %}
+                <div class="card mb-4">
+                    <div class="card-header bg-warning">
+                        <i class="bi bi-gear"></i> 2. TRANSFORMACIÓN - {{ transformacion.lote.codigo_lote }}
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <h6>Lavado</h6>
+                                <p><strong>Fecha:</strong> {{ transformacion.fecha_lavado|date:"d/m/Y H:i" }}</p>
+                                <p><strong>Temperatura:</strong> {{ transformacion.temperatura_lavado }}°C</p>
+                                <p><strong>Responsable:</strong> {{ transformacion.responsable_lavado }}</p>
+                            </div>
+                            <div class="col-md-4">
+                                <h6>Empaquetado</h6>
+                                <p><strong>Fecha:</strong> {{ transformacion.fecha_empaquetado|date:"d/m/Y H:i" }}</p>
+                                <p><strong>Tipo:</strong> {{ transformacion.tipo_empaque }}</p>
+                                <p><strong>Cantidad:</strong> {{ transformacion.cantidad_unidades }} unidades</p>
+                                <p><strong>Responsable:</strong> {{ transformacion.responsable_empaquetado }}</p>
+                            </div>
+                            <div class="col-md-4">
+                                <h6>Control de Calidad</h6>
+                                <p><strong>Fecha:</strong> {{ transformacion.fecha_control_calidad|date:"d/m/Y H:i" }}</p>
+                                <p><strong>Resultado:</strong> 
+                                    <span class="badge 
+                                        {% if transformacion.resultado_calidad == 'APROBADO' %}bg-success
+                                        {% elif transformacion.resultado_calidad == 'RECHAZADO' %}bg-danger
+                                        {% else %}bg-warning
+                                        {% endif %}">
+                                        {{ transformacion.get_resultado_calidad_display }}
+                                    </span>
+                                </p>
+                                <p><strong>Responsable:</strong> {{ transformacion.responsable_calidad }}</p>
+                                {% if transformacion.observaciones_calidad %}
+                                    <p><strong>Observaciones:</strong> {{ transformacion.observaciones_calidad }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="card mb-4 border-warning">
+                <div class="card-body text-warning">
+                    <i class="bi bi-exclamation-triangle"></i> No hay transformación registrada para este lote.
+                </div>
+            </div>
+        {% endif %}
+
+        <!-- Logística -->
+        {% if logisticas %}
+            {% for logistica in logisticas %}
+                <div class="card mb-4">
+                    <div class="card-header bg-info text-white">
+                        <i class="bi bi-truck"></i> 3. LOGÍSTICA - {{ logistica.numero_guia }}
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <h6>Información del Transporte</h6>
+                                <p><strong>Número de Guía:</strong> {{ logistica.numero_guia }}</p>
+                                <p><strong>Vehículo:</strong> {{ logistica.vehiculo }}</p>
+                                <p><strong>Conductor:</strong> {{ logistica.conductor }}</p>
+                                <p><strong>Estado:</strong> 
+                                    <span class="badge 
+                                        {% if logistica.estado == 'ENTREGADO' %}bg-success
+                                        {% elif logistica.estado == 'RETRASADO' %}bg-danger
+                                        {% else %}bg-info
+                                        {% endif %}">
+                                        {{ logistica.get_estado_display }}
+                                    </span>
+                                </p>
+                            </div>
+                            <div class="col-md-4">
+                                <h6>Registro de Temperatura</h6>
+                                <p><strong>Mínima:</strong> {{ logistica.temperatura_minima }}°C</p>
+                                <p><strong>Máxima:</strong> {{ logistica.temperatura_maxima }}°C</p>
+                                <p><strong>Promedio:</strong> <strong>{{ logistica.temperatura_promedio }}°C</strong></p>
+                            </div>
+                            <div class="col-md-4">
+                                <h6>Fechas y Destino</h6>
+                                <p><strong>Salida:</strong> {{ logistica.fecha_salida|date:"d/m/Y H:i" }}</p>
+                                <p><strong>Entrega:</strong> {{ logistica.fecha_entrega|date:"d/m/Y H:i" }}</p>
+                                <p><strong>Destino:</strong> {{ logistica.destino }}</p>
+                                <p><strong>Dirección:</strong> {{ logistica.direccion_destino }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="card mb-4 border-info">
+                <div class="card-body text-info">
+                    <i class="bi bi-exclamation-triangle"></i> No hay logística registrada para este lote.
+                </div>
+            </div>
+        {% endif %}
+
+        <div class="mt-4">
+            <a href="{% url 'detalle_lote' lote.pk %}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Volver al Detalle
+            </a>
+            <a href="{% url 'lista_lotes' %}" class="btn btn-primary">
+                <i class="bi bi-list"></i> Ver Todos los Lotes
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,88 @@
+{% extends 'proj/base.html' %}
+
+{% block title %}{{ titulo }} - Sistema de Trazabilidad{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-seedling"></i> {{ titulo }}
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.codigo_lote.id_for_label }}" class="form-label">
+                            {{ form.codigo_lote.label }}
+                        </label>
+                        {{ form.codigo_lote }}
+                        {% if form.codigo_lote.errors %}
+                            <div class="text-danger small">{{ form.codigo_lote.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.tipo_producto.id_for_label }}" class="form-label">
+                            {{ form.tipo_producto.label }}
+                        </label>
+                        {{ form.tipo_producto }}
+                        {% if form.tipo_producto.errors %}
+                            <div class="text-danger small">{{ form.tipo_producto.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.ubicacion.id_for_label }}" class="form-label">
+                            {{ form.ubicacion.label }}
+                        </label>
+                        {{ form.ubicacion }}
+                        {% if form.ubicacion.errors %}
+                            <div class="text-danger small">{{ form.ubicacion.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.area_hectareas.id_for_label }}" class="form-label">
+                                {{ form.area_hectareas.label }}
+                            </label>
+                            {{ form.area_hectareas }}
+                            {% if form.area_hectareas.errors %}
+                                <div class="text-danger small">{{ form.area_hectareas.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.fecha_cosecha.id_for_label }}" class="form-label">
+                                {{ form.fecha_cosecha.label }}
+                            </label>
+                            {{ form.fecha_cosecha }}
+                            {% if form.fecha_cosecha.errors %}
+                                <div class="text-danger small">{{ form.fecha_cosecha.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.responsable.id_for_label }}" class="form-label">
+                            {{ form.responsable.label }}
+                        </label>
+                        {{ form.responsable }}
+                        {% if form.responsable.errors %}
+                            <div class="text-danger small">{{ form.responsable.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{% url 'lista_lotes' %}" class="btn btn-secondary">Cancelar</a>
+                        <button type="submit" class="btn btn-primary">{{ accion }}</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

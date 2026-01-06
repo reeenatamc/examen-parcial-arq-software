@@ -1,0 +1,96 @@
+{% extends 'proj/base.html' %}
+
+{% block title %}Trazabilidades - Sistema de Trazabilidad{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1 class="mb-2"><i class="bi bi-diagram-3"></i> Trazabilidades</h1>
+                <p class="text-muted mb-0">Vista completa del estado de trazabilidad de todos los lotes</p>
+            </div>
+        </div>
+
+        {% if lotes_con_info %}
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Código del Lote</th>
+                            <th>Tipo de Producto</th>
+                            <th>Fecha de Cosecha</th>
+                            <th>Transformación</th>
+                            <th>Logística</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in lotes_con_info %}
+                            <tr>
+                                <td><strong>{{ item.lote.codigo_lote }}</strong></td>
+                                <td>{{ item.lote.tipo_producto }}</td>
+                                <td>{{ item.lote.fecha_cosecha }}</td>
+                                <td>
+                                    {% if item.tiene_transformacion %}
+                                        <span class="badge bg-success">
+                                            <i class="bi bi-check-circle"></i> {{ item.num_transformaciones }}
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">
+                                            <i class="bi bi-x-circle"></i> Sin registro
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if item.tiene_logistica %}
+                                        <span class="badge bg-success">
+                                            <i class="bi bi-check-circle"></i> {{ item.num_logisticas }}
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">
+                                            <i class="bi bi-x-circle"></i> Sin registro
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if item.tiene_trazabilidad_completa %}
+                                        <span class="badge bg-success">
+                                            <i class="bi bi-check-circle-fill"></i> Completa
+                                        </span>
+                                    {% elif item.tiene_transformacion %}
+                                        <span class="badge bg-warning">
+                                            <i class="bi bi-exclamation-triangle"></i> Parcial
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-danger">
+                                            <i class="bi bi-x-circle-fill"></i> Incompleta
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="d-flex gap-2">
+                                        <a href="{% url 'detalle_lote' item.lote.pk %}" class="btn btn-sm btn-info" title="Ver detalle">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a href="{% url 'trazabilidad_completa' item.lote.pk %}" class="btn btn-sm btn-primary" title="Ver trazabilidad">
+                                            <i class="bi bi-diagram-3"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle"></i> No hay lotes registrados.
+                <a href="{% url 'crear_lote' %}">Crear el primer lote</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+

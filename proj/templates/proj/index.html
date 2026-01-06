@@ -1,0 +1,151 @@
+{% extends 'proj/base.html' %}
+
+{% block title %}Inicio - Sistema de Trazabilidad{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="mb-5">
+            <h1 class="mb-3"><i class="bi bi-box-seam"></i> Sistema de Trazabilidad Agrícola</h1>
+            <p class="lead mb-0">Sistema para garantizar la trazabilidad de productos desde la cosecha hasta el supermercado.</p>
+        </div>
+    </div>
+</div>
+
+<!-- Estadísticas -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card stat-card border-primary">
+            <div class="card-body">
+                <h5 class="card-title"><i class="bi bi-seedling"></i> Lotes de Cultivo</h5>
+                <h2 class="text-primary">{{ total_lotes }}</h2>
+                <p class="text-muted mb-0">Registros de origen</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card stat-card border-warning">
+            <div class="card-body">
+                <h5 class="card-title"><i class="bi bi-gear"></i> Transformaciones</h5>
+                <h2 class="text-warning">{{ total_transformaciones }}</h2>
+                <p class="text-muted mb-0">Procesos de transformación</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card stat-card border-info">
+            <div class="card-body">
+                <h5 class="card-title"><i class="bi bi-truck"></i> Logísticas</h5>
+                <h2 class="text-info">{{ total_logisticas }}</h2>
+                <p class="text-muted mb-0">Registros de transporte</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Acciones Rápidas -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-lightning"></i> Acciones Rápidas
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <a href="{% url 'crear_lote' %}" class="btn btn-primary w-100">
+                            <i class="bi bi-plus-circle"></i> Crear Nuevo Lote
+                        </a>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <a href="{% url 'crear_transformacion' %}" class="btn btn-warning w-100">
+                            <i class="bi bi-plus-circle"></i> Nueva Transformación
+                        </a>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <a href="{% url 'crear_logistica' %}" class="btn btn-info w-100">
+                            <i class="bi bi-plus-circle"></i> Nueva Logística
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Información Reciente -->
+<div class="row">
+    <!-- Lotes Recientes -->
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-seedling"></i> Lotes Recientes
+            </div>
+            <div class="card-body">
+                {% if lotes_recientes %}
+                    <ul class="list-group list-group-flush">
+                        {% for lote in lotes_recientes %}
+                            <li class="list-group-item">
+                                <a href="{% url 'detalle_lote' lote.pk %}" class="d-block mb-1">{{ lote.codigo_lote }}</a>
+                                <small class="text-muted d-block">{{ lote.tipo_producto }} - {{ lote.fecha_cosecha }}</small>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="text-muted">No hay lotes registrados.</p>
+                {% endif %}
+                <a href="{% url 'lista_lotes' %}" class="btn btn-sm btn-outline-primary mt-2">Ver todos</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Transformaciones Recientes -->
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-gear"></i> Transformaciones Recientes
+            </div>
+            <div class="card-body">
+                {% if transformaciones_recientes %}
+                    <ul class="list-group list-group-flush">
+                        {% for trans in transformaciones_recientes %}
+                            <li class="list-group-item">
+                                <span class="d-block mb-1">Lote: <strong>{{ trans.lote.codigo_lote }}</strong></span>
+                                <small class="text-muted d-block">Calidad: {{ trans.get_resultado_calidad_display }}</small>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="text-muted">No hay transformaciones registradas.</p>
+                {% endif %}
+                <a href="{% url 'lista_transformaciones' %}" class="btn btn-sm btn-outline-warning mt-2">Ver todas</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Logísticas Recientes -->
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-truck"></i> Logísticas Recientes
+            </div>
+            <div class="card-body">
+                {% if logisticas_recientes %}
+                    <ul class="list-group list-group-flush">
+                        {% for log in logisticas_recientes %}
+                            <li class="list-group-item">
+                                <span class="d-block mb-1">Guía: <strong>{{ log.numero_guia }}</strong></span>
+                                <small class="text-muted d-block">Destino: {{ log.destino }}</small>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="text-muted">No hay logísticas registradas.</p>
+                {% endif %}
+                <a href="{% url 'lista_logisticas' %}" class="btn btn-sm btn-outline-info mt-2">Ver todas</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

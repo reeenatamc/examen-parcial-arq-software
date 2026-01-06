@@ -1,0 +1,139 @@
+{% extends 'proj/base.html' %}
+
+{% block title %}Detalle de Lote - {{ lote.codigo_lote }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1 class="mb-2"><i class="bi bi-seedling"></i> Detalle del Lote</h1>
+                <p class="text-muted mb-0">Código: <strong>{{ lote.codigo_lote }}</strong></p>
+            </div>
+            <a href="{% url 'trazabilidad_completa' lote.pk %}" class="btn btn-primary">
+                <i class="bi bi-diagram-3"></i> Ver Trazabilidad Completa
+            </a>
+        </div>
+
+        <!-- Información del Lote -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="bi bi-info-circle"></i> Información del Lote
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Código del Lote:</strong> {{ lote.codigo_lote }}</p>
+                        <p><strong>Tipo de Producto:</strong> {{ lote.tipo_producto }}</p>
+                        <p><strong>Ubicación:</strong> {{ lote.ubicacion }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Área:</strong> {{ lote.area_hectareas }} hectáreas</p>
+                        <p><strong>Fecha de Cosecha:</strong> {{ lote.fecha_cosecha }}</p>
+                        <p><strong>Responsable:</strong> {{ lote.responsable }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Transformaciones -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="bi bi-gear"></i> Transformaciones
+            </div>
+            <div class="card-body">
+                {% if transformaciones %}
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Fecha Lavado</th>
+                                    <th>Fecha Empaquetado</th>
+                                    <th>Control de Calidad</th>
+                                    <th>Resultado</th>
+                                    <th>Unidades</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for trans in transformaciones %}
+                                    <tr>
+                                        <td>{{ trans.fecha_lavado|date:"d/m/Y H:i" }}</td>
+                                        <td>{{ trans.fecha_empaquetado|date:"d/m/Y H:i" }}</td>
+                                        <td>{{ trans.fecha_control_calidad|date:"d/m/Y H:i" }}</td>
+                                        <td>
+                                            <span class="badge 
+                                                {% if trans.resultado_calidad == 'APROBADO' %}bg-success
+                                                {% elif trans.resultado_calidad == 'RECHAZADO' %}bg-danger
+                                                {% else %}bg-warning
+                                                {% endif %}">
+                                                {{ trans.get_resultado_calidad_display }}
+                                            </span>
+                                        </td>
+                                        <td>{{ trans.cantidad_unidades }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted">No hay transformaciones registradas para este lote.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Logísticas -->
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-truck"></i> Logísticas
+            </div>
+            <div class="card-body">
+                {% if logisticas %}
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Número de Guía</th>
+                                    <th>Destino</th>
+                                    <th>Fecha Salida</th>
+                                    <th>Fecha Entrega</th>
+                                    <th>Temp. Promedio</th>
+                                    <th>Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for log in logisticas %}
+                                    <tr>
+                                        <td>{{ log.numero_guia }}</td>
+                                        <td>{{ log.destino }}</td>
+                                        <td>{{ log.fecha_salida|date:"d/m/Y H:i" }}</td>
+                                        <td>{{ log.fecha_entrega|date:"d/m/Y H:i" }}</td>
+                                        <td>{{ log.temperatura_promedio }}°C</td>
+                                        <td>
+                                            <span class="badge 
+                                                {% if log.estado == 'ENTREGADO' %}bg-success
+                                                {% elif log.estado == 'RETRASADO' %}bg-danger
+                                                {% else %}bg-info
+                                                {% endif %}">
+                                                {{ log.get_estado_display }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted">No hay logísticas registradas para este lote.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="mt-4">
+            <a href="{% url 'lista_lotes' %}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Volver a la Lista
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

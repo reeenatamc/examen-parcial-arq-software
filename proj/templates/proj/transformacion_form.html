@@ -1,0 +1,127 @@
+{% extends 'proj/base.html' %}
+
+{% block title %}{{ titulo }} - Sistema de Trazabilidad{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-gear"></i> {{ titulo }}
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <h5 class="mb-3">Información General</h5>
+                    <div class="mb-3">
+                        <label for="{{ form.lote.id_for_label }}" class="form-label">{{ form.lote.label }}</label>
+                        {{ form.lote }}
+                        {% if form.lote.errors %}
+                            <div class="text-danger small">{{ form.lote.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <hr>
+                    <h5 class="mb-3">Datos de Lavado</h5>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.fecha_lavado.id_for_label }}" class="form-label">{{ form.fecha_lavado.label }}</label>
+                            {{ form.fecha_lavado }}
+                            {% if form.fecha_lavado.errors %}
+                                <div class="text-danger small">{{ form.fecha_lavado.errors }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label for="{{ form.temperatura_lavado.id_for_label }}" class="form-label">{{ form.temperatura_lavado.label }}</label>
+                            {{ form.temperatura_lavado }}
+                            {% if form.temperatura_lavado.errors %}
+                                <div class="text-danger small">{{ form.temperatura_lavado.errors }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label for="{{ form.responsable_lavado.id_for_label }}" class="form-label">{{ form.responsable_lavado.label }}</label>
+                            {{ form.responsable_lavado }}
+                            {% if form.responsable_lavado.errors %}
+                                <div class="text-danger small">{{ form.responsable_lavado.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <hr>
+                    <h5 class="mb-3">Datos de Empaquetado</h5>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="{{ form.fecha_empaquetado.id_for_label }}" class="form-label">{{ form.fecha_empaquetado.label }}</label>
+                            {{ form.fecha_empaquetado }}
+                            {% if form.fecha_empaquetado.errors %}
+                                <div class="text-danger small">{{ form.fecha_empaquetado.errors }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="{{ form.tipo_empaque.id_for_label }}" class="form-label">{{ form.tipo_empaque.label }}</label>
+                            {{ form.tipo_empaque }}
+                            {% if form.tipo_empaque.errors %}
+                                <div class="text-danger small">{{ form.tipo_empaque.errors }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="{{ form.cantidad_unidades.id_for_label }}" class="form-label">{{ form.cantidad_unidades.label }}</label>
+                            {{ form.cantidad_unidades }}
+                            {% if form.cantidad_unidades.errors %}
+                                <div class="text-danger small">{{ form.cantidad_unidades.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.responsable_empaquetado.id_for_label }}" class="form-label">{{ form.responsable_empaquetado.label }}</label>
+                        {{ form.responsable_empaquetado }}
+                        {% if form.responsable_empaquetado.errors %}
+                            <div class="text-danger small">{{ form.responsable_empaquetado.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <hr>
+                    <h5 class="mb-3">Control de Calidad</h5>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="{{ form.fecha_control_calidad.id_for_label }}" class="form-label">{{ form.fecha_control_calidad.label }}</label>
+                            {{ form.fecha_control_calidad }}
+                            {% if form.fecha_control_calidad.errors %}
+                                <div class="text-danger small">{{ form.fecha_control_calidad.errors }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="{{ form.resultado_calidad.id_for_label }}" class="form-label">{{ form.resultado_calidad.label }}</label>
+                            {{ form.resultado_calidad }}
+                            {% if form.resultado_calidad.errors %}
+                                <div class="text-danger small">{{ form.resultado_calidad.errors }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="{{ form.responsable_calidad.id_for_label }}" class="form-label">{{ form.responsable_calidad.label }}</label>
+                            {{ form.responsable_calidad }}
+                            {% if form.responsable_calidad.errors %}
+                                <div class="text-danger small">{{ form.responsable_calidad.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.observaciones_calidad.id_for_label }}" class="form-label">{{ form.observaciones_calidad.label }}</label>
+                        {{ form.observaciones_calidad }}
+                        {% if form.observaciones_calidad.errors %}
+                            <div class="text-danger small">{{ form.observaciones_calidad.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{% url 'lista_transformaciones' %}" class="btn btn-secondary">Cancelar</a>
+                        <button type="submit" class="btn btn-primary">{{ accion }}</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,64 @@
+{% extends 'proj/base.html' %}
+
+{% block title %}Transformaciones - Sistema de Trazabilidad{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1 class="mb-2">Transformaciones</h1>
+                <p class="text-muted mb-0">Procesos de lavado, empaquetado y control de calidad</p>
+            </div>
+            <a href="{% url 'crear_transformacion' %}" class="btn btn-warning">
+                <i class="bi bi-plus-circle"></i> Nueva Transformación
+            </a>
+        </div>
+
+        {% if transformaciones %}
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Lote</th>
+                            <th>Fecha Lavado</th>
+                            <th>Temp. Lavado</th>
+                            <th>Fecha Empaquetado</th>
+                            <th>Cantidad</th>
+                            <th>Control Calidad</th>
+                            <th>Resultado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for trans in transformaciones %}
+                            <tr>
+                                <td><strong>{{ trans.lote.codigo_lote }}</strong></td>
+                                <td>{{ trans.fecha_lavado|date:"d/m/Y H:i" }}</td>
+                                <td>{{ trans.temperatura_lavado }}°C</td>
+                                <td>{{ trans.fecha_empaquetado|date:"d/m/Y H:i" }}</td>
+                                <td>{{ trans.cantidad_unidades }}</td>
+                                <td>{{ trans.fecha_control_calidad|date:"d/m/Y H:i" }}</td>
+                                <td>
+                                    <span class="badge 
+                                        {% if trans.resultado_calidad == 'APROBADO' %}bg-success
+                                        {% elif trans.resultado_calidad == 'RECHAZADO' %}bg-danger
+                                        {% else %}bg-warning
+                                        {% endif %}">
+                                        {{ trans.get_resultado_calidad_display }}
+                                    </span>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle"></i> No hay transformaciones registradas.
+                <a href="{% url 'crear_transformacion' %}">Crear la primera transformación</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
