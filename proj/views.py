@@ -188,6 +188,59 @@ def crear_logistica(request):
     })
 
 
+def editar_logistica(request, pk):
+    """
+    Vista para editar un registro de logística existente.
+    
+    Permite actualizar los datos de la logística, especialmente el estado
+    para que se genere el código de trazabilidad cuando se marca como ENTREGADO.
+    """
+    logistica = get_object_or_404(Logistica, pk=pk)
+    
+    if request.method == 'POST':
+        form = LogisticaForm(request.POST, instance=logistica)
+        if form.is_valid():
+            # Validar trazabilidad completa
+            try:
+                transformacion = form.cleaned_data['transformacion']
+                lote = transformacion.lote
+                logistica_actualizada = form.save(commit=False)
+                
+                # Validar trazabilidad completa usando servicio de negocio
+                ServicioTrazabilidad.validar_trazabilidad_completa(
+                    lote,
+                    transformacion,
+                    logistica_actualizada
+                )
+                
+                # Si cambió a ENTREGADO, el código se generará en save()
+                logistica_actualizada.save()
+                
+                messages.success(
+                    request,
+                    f'Logística "{logistica_actualizada.numero_guia}" actualizada exitosamente.'
+                )
+                if logistica_actualizada.estado == 'ENTREGADO' and logistica_actualizada.codigo_trazabilidad:
+                    messages.info(
+                        request,
+                        f'Código de trazabilidad generado: {logistica_actualizada.codigo_trazabilidad}'
+                    )
+                return redirect('lista_logisticas')
+            except ValidacionTrazabilidadError as e:
+                messages.error(request, f'Error de validación: {str(e)}')
+        else:
+            messages.error(request, 'Por favor, corrija los errores en el formulario.')
+    else:
+        form = LogisticaForm(instance=logistica)
+    
+    return render(request, 'proj/logistica_form.html', {
+        'form': form,
+        'titulo': 'Editar Logística',
+        'accion': 'Actualizar',
+        'logistica': logistica
+    })
+
+
 def lista_logisticas(request):
     """
     Vista que lista todos los registros logísticos.
@@ -262,4 +315,34 @@ def lista_trazabilidades(request):
     
     return render(request, 'proj/lista_trazabilidades.html', {
         'lotes_con_info': lotes_con_info
+    })
+
+
+def buscar_por_codigo(request):
+    """
+    Vista para buscar trazabilidad completa por código QR/trazabilidad.
+    
+    Permite a los usuarios (incluyendo consumidores) buscar información
+    usando el código de trazabilidad del empaque.
+    """
+    codigo = request.GET.get('codigo', '').strip()
+    logistica = None
+    lote = None
+    transformacion = None
+    
+    if codigo:
+        try:
+            logistica = Logistica.objects.select_related(
+                'transformacion__lote'
+            ).get(codigo_trazabilidad=codigo)
+            transformacion = logistica.transformacion
+            lote = transformacion.lote
+        except Logistica.DoesNotExist:
+            messages.error(request, f'No se encontró trazabilidad para el código: {codigo}')
+    
+    return render(request, 'proj/buscar_trazabilidad.html', {
+        'codigo': codigo,
+        'logistica': logistica,
+        'transformacion': transformacion,
+        'lote': lote
     })

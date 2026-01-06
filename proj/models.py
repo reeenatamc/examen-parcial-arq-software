@@ -10,6 +10,7 @@ Utiliza Django ORM para mapear estas clases a tablas en la base de datos SQLite.
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils import timezone
+import uuid
 
 
 class LoteCultivo(models.Model):
@@ -37,6 +38,23 @@ class LoteCultivo(models.Model):
         verbose_name="Ubicación",
         help_text="Ubicación geográfica del lote de cultivo"
     )
+    # Coordenadas GPS para ubicación precisa
+    latitud = models.DecimalField(
+        max_digits=9,
+        decimal_places=6,
+        null=True,
+        blank=True,
+        verbose_name="Latitud",
+        help_text="Coordenada GPS de latitud del lote"
+    )
+    longitud = models.DecimalField(
+        max_digits=9,
+        decimal_places=6,
+        null=True,
+        blank=True,
+        verbose_name="Longitud",
+        help_text="Coordenada GPS de longitud del lote"
+    )
     area_hectareas = models.DecimalField(
         max_digits=10,
         decimal_places=2,
@@ -56,6 +74,18 @@ class LoteCultivo(models.Model):
         max_length=100,
         verbose_name="Responsable",
         help_text="Nombre del responsable del lote"
+    )
+    # Certificaciones y sellos de calidad
+    certificaciones = models.TextField(
+        blank=True,
+        null=True,
+        verbose_name="Certificaciones",
+        help_text="Certificaciones del producto (ej: Orgánico, Fair Trade, Rainforest Alliance, GlobalGAP)"
+    )
+    es_organico = models.BooleanField(
+        default=False,
+        verbose_name="Producto Orgánico",
+        help_text="Indica si el producto es orgánico certificado"
     )
     
     # Metadatos
@@ -259,6 +289,32 @@ class Logistica(models.Model):
         verbose_name="Estado"
     )
     
+    # Código único de trazabilidad (QR) generado cuando se completa la logística
+    codigo_trazabilidad = models.CharField(
+        max_length=100,
+        unique=True,
+        null=True,
+        blank=True,
+        verbose_name="Código de Trazabilidad",
+        help_text="Código único para rastrear el producto (se genera automáticamente)"
+    )
+    
+    # Información adicional del transporte
+    distancia_km = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        verbose_name="Distancia (km)",
+        help_text="Distancia recorrida en kilómetros"
+    )
+    observaciones_transporte = models.TextField(
+        blank=True,
+        null=True,
+        verbose_name="Observaciones del Transporte",
+        help_text="Observaciones adicionales sobre el transporte"
+    )
+    
     # Metadatos
     fecha_creacion = models.DateTimeField(
         auto_now_add=True,
@@ -273,6 +329,17 @@ class Logistica(models.Model):
         verbose_name = "Logística"
         verbose_name_plural = "Logísticas"
         ordering = ['-fecha_entrega']
+    
+    def save(self, *args, **kwargs):
+        """
+        Genera automáticamente el código de trazabilidad si no existe
+        cuando la logística está completada (ENTREGADO).
+        """
+        if not self.codigo_trazabilidad and self.estado == 'ENTREGADO':
+            # Genera un código único basado en el lote y un UUID
+            lote_codigo = self.transformacion.lote.codigo_lote.replace('-', '')
+            self.codigo_trazabilidad = f"TRZ-{lote_codigo}-{str(uuid.uuid4())[:8].upper()}"
+        super().save(*args, **kwargs)
     
     def __str__(self):
         return f"Logística {self.numero_guia} - {self.destino}"

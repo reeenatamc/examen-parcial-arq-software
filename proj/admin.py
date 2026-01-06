@@ -16,6 +16,7 @@ class LoteCultivoAdmin(admin.ModelAdmin):
         'codigo_lote',
         'tipo_producto',
         'ubicacion',
+        'es_organico',
         'fecha_cosecha',
         'responsable',
         'fecha_creacion'
@@ -57,6 +58,7 @@ class LogisticaAdmin(admin.ModelAdmin):
     """
     list_display = [
         'numero_guia',
+        'codigo_trazabilidad',
         'transformacion',
         'destino',
         'fecha_salida',

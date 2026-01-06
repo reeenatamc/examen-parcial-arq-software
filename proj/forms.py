@@ -33,9 +33,13 @@ class LoteCultivoForm(forms.ModelForm):
             'codigo_lote',
             'tipo_producto',
             'ubicacion',
+            'latitud',
+            'longitud',
             'area_hectareas',
             'fecha_cosecha',
-            'responsable'
+            'responsable',
+            'es_organico',
+            'certificaciones'
         ]
         widgets = {
             'codigo_lote': forms.TextInput(attrs={
@@ -50,6 +54,16 @@ class LoteCultivoForm(forms.ModelForm):
                 'class': 'form-control',
                 'placeholder': 'Ej: Finca San José, Valle Central'
             }),
+            'latitud': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'step': '0.000001',
+                'placeholder': 'Ej: 9.928069'
+            }),
+            'longitud': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'step': '0.000001',
+                'placeholder': 'Ej: -84.090725'
+            }),
             'area_hectareas': forms.NumberInput(attrs={
                 'class': 'form-control',
                 'step': '0.01',
@@ -62,15 +76,27 @@ class LoteCultivoForm(forms.ModelForm):
             'responsable': forms.TextInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'Nombre del responsable'
+            }),
+            'es_organico': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            }),
+            'certificaciones': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Ej: Certificado Orgánico USDA, Fair Trade, GlobalGAP'
             })
         }
         labels = {
             'codigo_lote': 'Código del Lote *',
             'tipo_producto': 'Tipo de Producto *',
             'ubicacion': 'Ubicación *',
+            'latitud': 'Latitud GPS',
+            'longitud': 'Longitud GPS',
             'area_hectareas': 'Área (hectáreas) *',
             'fecha_cosecha': 'Fecha de Cosecha *',
-            'responsable': 'Responsable *'
+            'responsable': 'Responsable *',
+            'es_organico': 'Producto Orgánico',
+            'certificaciones': 'Certificaciones'
         }
     
     def clean_codigo_lote(self):
@@ -249,7 +275,9 @@ class LogisticaForm(forms.ModelForm):
             'fecha_entrega',
             'destino',
             'direccion_destino',
-            'estado'
+            'estado',
+            'distancia_km',
+            'observaciones_transporte'
         ]
         widgets = {
             'transformacion': forms.Select(attrs={
@@ -299,6 +327,16 @@ class LogisticaForm(forms.ModelForm):
             }),
             'estado': forms.Select(attrs={
                 'class': 'form-control'
+            }),
+            'distancia_km': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'step': '0.01',
+                'placeholder': 'Ej: 150.50'
+            }),
+            'observaciones_transporte': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Observaciones adicionales sobre el transporte'
             })
         }
         labels = {
@@ -313,7 +351,9 @@ class LogisticaForm(forms.ModelForm):
             'fecha_entrega': 'Fecha y Hora de Entrega *',
             'destino': 'Destino (Supermercado) *',
             'direccion_destino': 'Dirección de Destino *',
-            'estado': 'Estado *'
+            'estado': 'Estado *',
+            'distancia_km': 'Distancia (km)',
+            'observaciones_transporte': 'Observaciones del Transporte'
         }
     
     def __init__(self, *args, **kwargs):

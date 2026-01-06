@@ -93,6 +93,7 @@
                             <thead>
                                 <tr>
                                     <th>Número de Guía</th>
+                                    <th>Código Trazabilidad</th>
                                     <th>Destino</th>
                                     <th>Fecha Salida</th>
                                     <th>Fecha Entrega</th>
@@ -104,6 +105,20 @@
                                 {% for log in logisticas %}
                                     <tr>
                                         <td>{{ log.numero_guia }}</td>
+                                        <td>
+                                            {% if log.codigo_trazabilidad %}
+                                                <code style="font-size: 0.85rem; background: #f8f9fa; padding: 0.25rem 0.5rem; border-radius: 0.25rem;">
+                                                    {{ log.codigo_trazabilidad }}
+                                                </code>
+                                                <br>
+                                                <a href="{% url 'buscar_trazabilidad' %}?codigo={{ log.codigo_trazabilidad }}" 
+                                                   class="btn btn-sm btn-outline-primary mt-1">
+                                                    <i class="bi bi-qr-code"></i> Ver
+                                                </a>
+                                            {% else %}
+                                                <span class="text-muted small">Pendiente</span>
+                                            {% endif %}
+                                        </td>
                                         <td>{{ log.destino }}</td>
                                         <td>{{ log.fecha_salida|date:"d/m/Y H:i" }}</td>
                                         <td>{{ log.fecha_entrega|date:"d/m/Y H:i" }}</td>

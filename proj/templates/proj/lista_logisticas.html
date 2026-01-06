@@ -21,26 +21,33 @@
                     <thead class="table-dark">
                         <tr>
                             <th>Número de Guía</th>
+                            <th>Código Trazabilidad</th>
                             <th>Lote</th>
                             <th>Destino</th>
                             <th>Fecha Salida</th>
                             <th>Fecha Entrega</th>
-                            <th>Temp. Min</th>
-                            <th>Temp. Max</th>
                             <th>Temp. Prom</th>
                             <th>Estado</th>
+                            <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for log in logisticas %}
                             <tr>
                                 <td><strong>{{ log.numero_guia }}</strong></td>
+                                <td>
+                                    {% if log.codigo_trazabilidad %}
+                                        <code style="font-size: 0.85rem; background: #f8f9fa; padding: 0.25rem 0.5rem; border-radius: 0.25rem;">
+                                            {{ log.codigo_trazabilidad }}
+                                        </code>
+                                    {% else %}
+                                        <span class="text-muted small">Pendiente</span>
+                                    {% endif %}
+                                </td>
                                 <td>{{ log.transformacion.lote.codigo_lote }}</td>
                                 <td>{{ log.destino }}</td>
                                 <td>{{ log.fecha_salida|date:"d/m/Y H:i" }}</td>
                                 <td>{{ log.fecha_entrega|date:"d/m/Y H:i" }}</td>
-                                <td>{{ log.temperatura_minima }}°C</td>
-                                <td>{{ log.temperatura_maxima }}°C</td>
                                 <td><strong>{{ log.temperatura_promedio }}°C</strong></td>
                                 <td>
                                     <span class="badge 
@@ -50,6 +57,22 @@
                                         {% endif %}">
                                         {{ log.get_estado_display }}
                                     </span>
+                                </td>
+                                <td>
+                                    <div class="d-flex gap-2">
+                                        <a href="{% url 'editar_logistica' log.pk %}" 
+                                           class="btn btn-sm btn-warning" 
+                                           title="Editar logística">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        {% if log.codigo_trazabilidad %}
+                                            <a href="{% url 'buscar_trazabilidad' %}?codigo={{ log.codigo_trazabilidad }}" 
+                                               class="btn btn-sm btn-outline-primary" 
+                                               title="Ver trazabilidad">
+                                                <i class="bi bi-qr-code"></i>
+                                            </a>
+                                        {% endif %}
+                                    </div>
                                 </td>
                             </tr>
                         {% endfor %}

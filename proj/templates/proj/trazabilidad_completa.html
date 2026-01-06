@@ -8,6 +8,24 @@
         <div class="mb-4">
             <h1 class="mb-2"><i class="bi bi-diagram-3"></i> Trazabilidad Completa</h1>
             <p class="text-muted mb-0">Lote: <strong>{{ lote.codigo_lote }}</strong></p>
+            {% if logisticas %}
+                {% for log in logisticas %}
+                    {% if log.codigo_trazabilidad %}
+                        <div class="alert alert-success mt-3">
+                            <h5 class="mb-2"><i class="bi bi-qr-code"></i> Código de Trazabilidad</h5>
+                            <p class="mb-2"><strong>Código:</strong> <code style="font-size: 1.2rem; background: white; padding: 0.5rem; border-radius: 0.25rem;">{{ log.codigo_trazabilidad }}</code></p>
+                            <p class="mb-0 small">
+                                Usa este código para buscar la trazabilidad completa del producto. 
+                                <a href="{% url 'buscar_trazabilidad' %}?codigo={{ log.codigo_trazabilidad }}" class="alert-link">Ver en búsqueda</a>
+                            </p>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-warning mt-3">
+                            <i class="bi bi-info-circle"></i> El código de trazabilidad se generará automáticamente cuando la logística tenga estado "Entregado".
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
         </div>
 
         {% if errores_validacion %}
@@ -161,6 +179,14 @@
                             <div class="col-md-4">
                                 <h6>Información del Transporte</h6>
                                 <p><strong>Número de Guía:</strong> {{ logistica.numero_guia }}</p>
+                                {% if logistica.codigo_trazabilidad %}
+                                    <p>
+                                        <strong>Código de Trazabilidad:</strong><br>
+                                        <code style="font-size: 1rem; background: #f8f9fa; padding: 0.5rem; border-radius: 0.25rem; display: inline-block; margin-top: 0.25rem;">
+                                            {{ logistica.codigo_trazabilidad }}
+                                        </code>
+                                    </p>
+                                {% endif %}
                                 <p><strong>Vehículo:</strong> {{ logistica.vehiculo }}</p>
                                 <p><strong>Conductor:</strong> {{ logistica.conductor }}</p>
                                 <p><strong>Estado:</strong> 

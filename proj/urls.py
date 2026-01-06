@@ -21,8 +21,10 @@ urlpatterns = [
     # URLs para Logísticas
     path('logisticas/', views.lista_logisticas, name='lista_logisticas'),
     path('logisticas/crear/', views.crear_logistica, name='crear_logistica'),
+    path('logisticas/<int:pk>/editar/', views.editar_logistica, name='editar_logistica'),
     
     # URLs para Trazabilidades
     path('trazabilidades/', views.lista_trazabilidades, name='lista_trazabilidades'),
+    path('buscar/', views.buscar_por_codigo, name='buscar_trazabilidad'),
 ]
 

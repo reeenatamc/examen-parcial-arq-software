@@ -1,0 +1,149 @@
+{% extends 'proj/base.html' %}
+
+{% block title %}Buscar Trazabilidad - Sistema de Trazabilidad{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="bi bi-qr-code-scan"></i> Buscar Trazabilidad por Código
+            </div>
+            <div class="card-body">
+                <p class="text-muted mb-4">
+                    Ingresa el código de trazabilidad del producto para ver toda su información desde el origen hasta el destino.
+                </p>
+                <form method="get" action="{% url 'buscar_trazabilidad' %}">
+                    <div class="input-group mb-3">
+                        <input 
+                            type="text" 
+                            name="codigo" 
+                            class="form-control" 
+                            placeholder="Ej: TRZ-LOTE2024001-A1B2C3D4" 
+                            value="{{ codigo }}"
+                            required
+                        >
+                        <button class="btn btn-primary" type="submit">
+                            <i class="bi bi-search"></i> Buscar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        {% if lote %}
+            <!-- Resultado de la búsqueda -->
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <i class="bi bi-check-circle"></i> Trazabilidad Encontrada: {{ logistica.codigo_trazabilidad }}
+                </div>
+                <div class="card-body">
+                    <!-- Información del Lote -->
+                    <h5 class="mb-3"><i class="bi bi-seedling"></i> Origen</h5>
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <p><strong>Código del Lote:</strong> {{ lote.codigo_lote }}</p>
+                            <p><strong>Tipo de Producto:</strong> {{ lote.tipo_producto }}</p>
+                            {% if lote.es_organico %}
+                                <p><span class="badge bg-success"><i class="bi bi-check-circle"></i> Producto Orgánico</span></p>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Ubicación:</strong> {{ lote.ubicacion }}</p>
+                            {% if lote.latitud and lote.longitud %}
+                                <p><strong>GPS:</strong> {{ lote.latitud }}, {{ lote.longitud }}</p>
+                                <a href="https://www.google.com/maps?q={{ lote.latitud }},{{ lote.longitud }}" 
+                                   target="_blank" 
+                                   class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-geo-alt"></i> Ver en Google Maps
+                                </a>
+                            {% endif %}
+                            <p><strong>Fecha de Cosecha:</strong> {{ lote.fecha_cosecha }}</p>
+                        </div>
+                    </div>
+                    {% if lote.certificaciones %}
+                        <div class="alert alert-info">
+                            <strong>Certificaciones:</strong><br>
+                            {{ lote.certificaciones }}
+                        </div>
+                    {% endif %}
+
+                    <!-- Información de Transformación -->
+                    <hr>
+                    <h5 class="mb-3"><i class="bi bi-gear"></i> Transformación</h5>
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <p><strong>Fecha de Lavado:</strong> {{ transformacion.fecha_lavado|date:"d/m/Y H:i" }}</p>
+                            <p><strong>Temperatura:</strong> {{ transformacion.temperatura_lavado }}°C</p>
+                        </div>
+                        <div class="col-md-4">
+                            <p><strong>Fecha de Empaquetado:</strong> {{ transformacion.fecha_empaquetado|date:"d/m/Y H:i" }}</p>
+                            <p><strong>Tipo de Empaque:</strong> {{ transformacion.tipo_empaque }}</p>
+                            <p><strong>Unidades:</strong> {{ transformacion.cantidad_unidades }}</p>
+                        </div>
+                        <div class="col-md-4">
+                            <p><strong>Control de Calidad:</strong> 
+                                <span class="badge 
+                                    {% if transformacion.resultado_calidad == 'APROBADO' %}bg-success
+                                    {% elif transformacion.resultado_calidad == 'RECHAZADO' %}bg-danger
+                                    {% else %}bg-warning
+                                    {% endif %}">
+                                    {{ transformacion.get_resultado_calidad_display }}
+                                </span>
+                            </p>
+                            <p><strong>Fecha:</strong> {{ transformacion.fecha_control_calidad|date:"d/m/Y H:i" }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Información de Logística -->
+                    <hr>
+                    <h5 class="mb-3"><i class="bi bi-truck"></i> Logística</h5>
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <p><strong>Número de Guía:</strong> {{ logistica.numero_guia }}</p>
+                            <p><strong>Vehículo:</strong> {{ logistica.vehiculo }}</p>
+                            <p><strong>Conductor:</strong> {{ logistica.conductor }}</p>
+                        </div>
+                        <div class="col-md-4">
+                            <p><strong>Temperaturas:</strong></p>
+                            <ul class="list-unstyled">
+                                <li>Mínima: {{ logistica.temperatura_minima }}°C</li>
+                                <li>Máxima: {{ logistica.temperatura_maxima }}°C</li>
+                                <li>Promedio: <strong>{{ logistica.temperatura_promedio }}°C</strong></li>
+                            </ul>
+                            {% if logistica.distancia_km %}
+                                <p><strong>Distancia:</strong> {{ logistica.distancia_km }} km</p>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-4">
+                            <p><strong>Salida:</strong> {{ logistica.fecha_salida|date:"d/m/Y H:i" }}</p>
+                            <p><strong>Entrega:</strong> {{ logistica.fecha_entrega|date:"d/m/Y H:i" }}</p>
+                            <p><strong>Destino:</strong> {{ logistica.destino }}</p>
+                            <p><strong>Estado:</strong> 
+                                <span class="badge 
+                                    {% if logistica.estado == 'ENTREGADO' %}bg-success
+                                    {% elif logistica.estado == 'RETRASADO' %}bg-danger
+                                    {% else %}bg-info
+                                    {% endif %}">
+                                    {{ logistica.get_estado_display }}
+                                </span>
+                            </p>
+                        </div>
+                    </div>
+                    {% if logistica.observaciones_transporte %}
+                        <div class="alert alert-secondary">
+                            <strong>Observaciones:</strong><br>
+                            {{ logistica.observaciones_transporte }}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        {% elif codigo %}
+            <div class="alert alert-warning">
+                <i class="bi bi-exclamation-triangle"></i> No se encontró información de trazabilidad para el código proporcionado.
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
