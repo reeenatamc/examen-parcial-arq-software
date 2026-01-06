@@ -343,3 +343,96 @@ class Logistica(models.Model):
     
     def __str__(self):
         return f"Logística {self.numero_guia} - {self.destino}"
+
+
+class Auditoria(models.Model):
+    """
+    Modelo de auditoría para registrar cambios en los registros.
+    
+    Almacena información sobre quién, cuándo y qué cambió en cada entidad
+    del sistema de trazabilidad.
+    """
+    # Tipo de entidad modificada
+    TIPO_LOTE = 'LOTE'
+    TIPO_TRANSFORMACION = 'TRANSFORMACION'
+    TIPO_LOGISTICA = 'LOGISTICA'
+    
+    TIPO_CHOICES = [
+        (TIPO_LOTE, 'Lote de Cultivo'),
+        (TIPO_TRANSFORMACION, 'Transformación'),
+        (TIPO_LOGISTICA, 'Logística'),
+    ]
+    
+    # Acción realizada
+    ACCION_CREAR = 'CREAR'
+    ACCION_ACTUALIZAR = 'ACTUALIZAR'
+    ACCION_ELIMINAR = 'ELIMINAR'
+    
+    ACCION_CHOICES = [
+        (ACCION_CREAR, 'Crear'),
+        (ACCION_ACTUALIZAR, 'Actualizar'),
+        (ACCION_ELIMINAR, 'Eliminar'),
+    ]
+    
+    tipo_entidad = models.CharField(
+        max_length=20,
+        choices=TIPO_CHOICES,
+        verbose_name="Tipo de Entidad"
+    )
+    entidad_id = models.PositiveIntegerField(
+        verbose_name="ID de la Entidad"
+    )
+    accion = models.CharField(
+        max_length=20,
+        choices=ACCION_CHOICES,
+        verbose_name="Acción"
+    )
+    campo_modificado = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        verbose_name="Campo Modificado",
+        help_text="Campo que fue modificado (solo para actualizaciones)"
+    )
+    valor_anterior = models.TextField(
+        blank=True,
+        null=True,
+        verbose_name="Valor Anterior"
+    )
+    valor_nuevo = models.TextField(
+        blank=True,
+        null=True,
+        verbose_name="Valor Nuevo"
+    )
+    descripcion = models.TextField(
+        verbose_name="Descripción",
+        help_text="Descripción del cambio realizado"
+    )
+    usuario = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        verbose_name="Usuario",
+        help_text="Usuario que realizó el cambio"
+    )
+    fecha_cambio = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name="Fecha del Cambio"
+    )
+    ip_address = models.GenericIPAddressField(
+        blank=True,
+        null=True,
+        verbose_name="Dirección IP"
+    )
+    
+    class Meta:
+        verbose_name = "Auditoría"
+        verbose_name_plural = "Auditorías"
+        ordering = ['-fecha_cambio']
+        indexes = [
+            models.Index(fields=['tipo_entidad', 'entidad_id']),
+            models.Index(fields=['fecha_cambio']),
+        ]
+    
+    def __str__(self):
+        return f"{self.get_accion_display()} {self.get_tipo_entidad_display()} #{self.entidad_id} - {self.fecha_cambio}"

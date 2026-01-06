@@ -4,7 +4,7 @@ Permite gestionar los datos desde la interfaz administrativa.
 """
 
 from django.contrib import admin
-from .models import LoteCultivo, Transformacion, Logistica
+from .models import LoteCultivo, Transformacion, Logistica, Auditoria
 
 
 @admin.register(LoteCultivo)
@@ -76,3 +76,29 @@ class LogisticaAdmin(admin.ModelAdmin):
     ]
     readonly_fields = ['fecha_creacion', 'fecha_actualizacion']
     date_hierarchy = 'fecha_salida'
+
+
+@admin.register(Auditoria)
+class AuditoriaAdmin(admin.ModelAdmin):
+    """
+    Configuración del admin para el modelo Auditoria.
+    """
+    list_display = [
+        'fecha_cambio',
+        'tipo_entidad',
+        'entidad_id',
+        'accion',
+        'campo_modificado',
+        'descripcion',
+        'usuario',
+        'ip_address'
+    ]
+    list_filter = ['tipo_entidad', 'accion', 'fecha_cambio']
+    search_fields = [
+        'descripcion',
+        'usuario',
+        'ip_address',
+        'campo_modificado'
+    ]
+    readonly_fields = ['fecha_cambio']
+    date_hierarchy = 'fecha_cambio'

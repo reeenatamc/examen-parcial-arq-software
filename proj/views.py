@@ -12,9 +12,10 @@ para procesar y validar los datos antes de guardarlos.
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.views.generic import ListView, DetailView
-from .models import LoteCultivo, Transformacion, Logistica
+from .models import LoteCultivo, Transformacion, Logistica, Auditoria
 from .forms import LoteCultivoForm, TransformacionForm, LogisticaForm
 from .business_logic.validaciones import ServicioTrazabilidad, ValidacionTrazabilidadError
+from .utils import registrar_auditoria
 
 
 def index(request):
@@ -62,6 +63,14 @@ def crear_lote(request):
         if form.is_valid():
             # Los formularios ya aplican validaciones de la capa de negocio
             lote = form.save()
+            # Registrar auditoría
+            registrar_auditoria(
+                tipo_entidad=Auditoria.TIPO_LOTE,
+                entidad_id=lote.id,
+                accion=Auditoria.ACCION_CREAR,
+                descripcion=f'Lote de cultivo "{lote.codigo_lote}" creado',
+                request=request
+            )
             messages.success(
                 request,
                 f'Lote de cultivo "{lote.codigo_lote}" creado exitosamente.'
@@ -76,6 +85,71 @@ def crear_lote(request):
         'form': form,
         'titulo': 'Nuevo Lote de Cultivo',
         'accion': 'Crear'
+    })
+
+
+def editar_lote(request, pk):
+    """
+    Vista para editar un lote de cultivo existente.
+    
+    Permite actualizar los datos del lote y registra los cambios en auditoría.
+    """
+    lote = get_object_or_404(LoteCultivo, pk=pk)
+    
+    if request.method == 'POST':
+        form = LoteCultivoForm(request.POST, instance=lote)
+        if form.is_valid():
+            # Detectar cambios importantes antes de guardar
+            cambios = []
+            for field in form.changed_data:
+                old_value = getattr(lote, field, None)
+                new_value = form.cleaned_data.get(field)
+                if old_value != new_value:
+                    cambios.append({
+                        'campo': field,
+                        'anterior': old_value,
+                        'nuevo': new_value
+                    })
+            
+            lote_actualizado = form.save()
+            
+            # Registrar auditoría para cada cambio
+            if cambios:
+                for cambio in cambios:
+                    registrar_auditoria(
+                        tipo_entidad=Auditoria.TIPO_LOTE,
+                        entidad_id=lote_actualizado.id,
+                        accion=Auditoria.ACCION_ACTUALIZAR,
+                        campo_modificado=cambio['campo'],
+                        valor_anterior=cambio['anterior'],
+                        valor_nuevo=cambio['nuevo'],
+                        descripcion=f'Lote "{lote_actualizado.codigo_lote}": {cambio["campo"]} actualizado',
+                        request=request
+                    )
+            else:
+                registrar_auditoria(
+                    tipo_entidad=Auditoria.TIPO_LOTE,
+                    entidad_id=lote_actualizado.id,
+                    accion=Auditoria.ACCION_ACTUALIZAR,
+                    descripcion=f'Lote "{lote_actualizado.codigo_lote}" actualizado',
+                    request=request
+                )
+            
+            messages.success(
+                request,
+                f'Lote de cultivo "{lote_actualizado.codigo_lote}" actualizado exitosamente.'
+            )
+            return redirect('detalle_lote', pk=lote_actualizado.pk)
+        else:
+            messages.error(request, 'Por favor, corrija los errores en el formulario.')
+    else:
+        form = LoteCultivoForm(instance=lote)
+    
+    return render(request, 'proj/lote_form.html', {
+        'form': form,
+        'titulo': 'Editar Lote de Cultivo',
+        'accion': 'Actualizar',
+        'lote': lote
     })
 
 
@@ -99,10 +173,43 @@ def detalle_lote(request, pk):
     # Obtener logísticas relacionadas a través de transformaciones
     logisticas = Logistica.objects.filter(transformacion__lote=lote)
     
+    # Obtener historial de auditoría del lote
+    historial_lote = Auditoria.objects.filter(
+        tipo_entidad=Auditoria.TIPO_LOTE,
+        entidad_id=lote.id
+    ).order_by('-fecha_cambio')[:10]
+    
+    # Obtener historial de transformaciones relacionadas
+    historial_transformaciones = []
+    for trans in transformaciones:
+        historial = Auditoria.objects.filter(
+            tipo_entidad=Auditoria.TIPO_TRANSFORMACION,
+            entidad_id=trans.id
+        ).order_by('-fecha_cambio')[:5]
+        historial_transformaciones.append({
+            'transformacion': trans,
+            'historial': historial
+        })
+    
+    # Obtener historial de logísticas relacionadas
+    historial_logisticas = []
+    for log in logisticas:
+        historial = Auditoria.objects.filter(
+            tipo_entidad=Auditoria.TIPO_LOGISTICA,
+            entidad_id=log.id
+        ).order_by('-fecha_cambio')[:5]
+        historial_logisticas.append({
+            'logistica': log,
+            'historial': historial
+        })
+    
     return render(request, 'proj/detalle_lote.html', {
         'lote': lote,
         'transformaciones': transformaciones,
-        'logisticas': logisticas
+        'logisticas': logisticas,
+        'historial_lote': historial_lote,
+        'historial_transformaciones': historial_transformaciones,
+        'historial_logisticas': historial_logisticas
     })
 
 
@@ -118,6 +225,14 @@ def crear_transformacion(request):
         if form.is_valid():
             # Los formularios ya aplican validaciones de la capa de negocio
             transformacion = form.save()
+            # Registrar auditoría
+            registrar_auditoria(
+                tipo_entidad=Auditoria.TIPO_TRANSFORMACION,
+                entidad_id=transformacion.id,
+                accion=Auditoria.ACCION_CREAR,
+                descripcion=f'Transformación creada para lote "{transformacion.lote.codigo_lote}"',
+                request=request
+            )
             messages.success(
                 request,
                 f'Transformación para el lote "{transformacion.lote.codigo_lote}" creada exitosamente.'
@@ -132,6 +247,71 @@ def crear_transformacion(request):
         'form': form,
         'titulo': 'Nueva Transformación',
         'accion': 'Crear'
+    })
+
+
+def editar_transformacion(request, pk):
+    """
+    Vista para editar una transformación existente.
+    
+    Permite actualizar los datos de la transformación y registra los cambios.
+    """
+    transformacion = get_object_or_404(Transformacion, pk=pk)
+    
+    if request.method == 'POST':
+        form = TransformacionForm(request.POST, instance=transformacion)
+        if form.is_valid():
+            # Detectar cambios importantes antes de guardar
+            cambios = []
+            for field in form.changed_data:
+                old_value = getattr(transformacion, field, None)
+                new_value = form.cleaned_data.get(field)
+                if old_value != new_value:
+                    cambios.append({
+                        'campo': field,
+                        'anterior': old_value,
+                        'nuevo': new_value
+                    })
+            
+            transformacion_actualizada = form.save()
+            
+            # Registrar auditoría para cada cambio
+            if cambios:
+                for cambio in cambios:
+                    registrar_auditoria(
+                        tipo_entidad=Auditoria.TIPO_TRANSFORMACION,
+                        entidad_id=transformacion_actualizada.id,
+                        accion=Auditoria.ACCION_ACTUALIZAR,
+                        campo_modificado=cambio['campo'],
+                        valor_anterior=cambio['anterior'],
+                        valor_nuevo=cambio['nuevo'],
+                        descripcion=f'Transformación (Lote: {transformacion_actualizada.lote.codigo_lote}): {cambio["campo"]} actualizado',
+                        request=request
+                    )
+            else:
+                registrar_auditoria(
+                    tipo_entidad=Auditoria.TIPO_TRANSFORMACION,
+                    entidad_id=transformacion_actualizada.id,
+                    accion=Auditoria.ACCION_ACTUALIZAR,
+                    descripcion=f'Transformación (Lote: {transformacion_actualizada.lote.codigo_lote}) actualizada',
+                    request=request
+                )
+            
+            messages.success(
+                request,
+                f'Transformación para el lote "{transformacion_actualizada.lote.codigo_lote}" actualizada exitosamente.'
+            )
+            return redirect('lista_transformaciones')
+        else:
+            messages.error(request, 'Por favor, corrija los errores en el formulario.')
+    else:
+        form = TransformacionForm(instance=transformacion)
+    
+    return render(request, 'proj/transformacion_form.html', {
+        'form': form,
+        'titulo': 'Editar Transformación',
+        'accion': 'Actualizar',
+        'transformacion': transformacion
     })
 
 
@@ -169,6 +349,14 @@ def crear_logistica(request):
                 )
                 
                 logistica.save()
+                # Registrar auditoría
+                registrar_auditoria(
+                    tipo_entidad=Auditoria.TIPO_LOGISTICA,
+                    entidad_id=logistica.id,
+                    accion=Auditoria.ACCION_CREAR,
+                    descripcion=f'Logística "{logistica.numero_guia}" creada',
+                    request=request
+                )
                 messages.success(
                     request,
                     f'Registro logístico "{logistica.numero_guia}" creado exitosamente.'
@@ -213,18 +401,56 @@ def editar_logistica(request, pk):
                     logistica_actualizada
                 )
                 
+                # Detectar cambios importantes
+                estado_anterior = logistica.estado if logistica.pk else None
+                codigo_anterior = logistica.codigo_trazabilidad if logistica.pk else None
+                
                 # Si cambió a ENTREGADO, el código se generará en save()
                 logistica_actualizada.save()
+                
+                # Registrar auditoría
+                descripcion = f'Logística "{logistica_actualizada.numero_guia}" actualizada'
+                if estado_anterior != logistica_actualizada.estado:
+                    registrar_auditoria(
+                        tipo_entidad=Auditoria.TIPO_LOGISTICA,
+                        entidad_id=logistica_actualizada.id,
+                        accion=Auditoria.ACCION_ACTUALIZAR,
+                        campo_modificado='estado',
+                        valor_anterior=estado_anterior,
+                        valor_nuevo=logistica_actualizada.estado,
+                        descripcion=f'{descripcion}: Estado cambiado de {estado_anterior} a {logistica_actualizada.estado}',
+                        request=request
+                    )
+                else:
+                    registrar_auditoria(
+                        tipo_entidad=Auditoria.TIPO_LOGISTICA,
+                        entidad_id=logistica_actualizada.id,
+                        accion=Auditoria.ACCION_ACTUALIZAR,
+                        descripcion=descripcion,
+                        request=request
+                    )
+                
+                # Registrar si se generó código de trazabilidad
+                if logistica_actualizada.codigo_trazabilidad and codigo_anterior != logistica_actualizada.codigo_trazabilidad:
+                    registrar_auditoria(
+                        tipo_entidad=Auditoria.TIPO_LOGISTICA,
+                        entidad_id=logistica_actualizada.id,
+                        accion=Auditoria.ACCION_ACTUALIZAR,
+                        campo_modificado='codigo_trazabilidad',
+                        valor_anterior=codigo_anterior,
+                        valor_nuevo=logistica_actualizada.codigo_trazabilidad,
+                        descripcion=f'Código de trazabilidad generado: {logistica_actualizada.codigo_trazabilidad}',
+                        request=request
+                    )
+                    messages.info(
+                        request,
+                        f'Código de trazabilidad generado: {logistica_actualizada.codigo_trazabilidad}'
+                    )
                 
                 messages.success(
                     request,
                     f'Logística "{logistica_actualizada.numero_guia}" actualizada exitosamente.'
                 )
-                if logistica_actualizada.estado == 'ENTREGADO' and logistica_actualizada.codigo_trazabilidad:
-                    messages.info(
-                        request,
-                        f'Código de trazabilidad generado: {logistica_actualizada.codigo_trazabilidad}'
-                    )
                 return redirect('lista_logisticas')
             except ValidacionTrazabilidadError as e:
                 messages.error(request, f'Error de validación: {str(e)}')
@@ -279,11 +505,38 @@ def trazabilidad_completa(request, lote_pk):
                 except ValidacionTrazabilidadError as e:
                     errores_validacion.append(str(e))
     
+    # Obtener historial de auditoría completo
+    historial_lote = Auditoria.objects.filter(
+        tipo_entidad=Auditoria.TIPO_LOTE,
+        entidad_id=lote.id
+    ).order_by('-fecha_cambio')[:10]
+    
+    # Historial de transformaciones y logísticas
+    historial_completo = []
+    for transformacion in transformaciones:
+        historial_trans = Auditoria.objects.filter(
+            tipo_entidad=Auditoria.TIPO_TRANSFORMACION,
+            entidad_id=transformacion.id
+        ).order_by('-fecha_cambio')[:5]
+        historial_completo.extend(historial_trans)
+    
+    for logistica in logisticas:
+        historial_log = Auditoria.objects.filter(
+            tipo_entidad=Auditoria.TIPO_LOGISTICA,
+            entidad_id=logistica.id
+        ).order_by('-fecha_cambio')[:5]
+        historial_completo.extend(historial_log)
+    
+    # Ordenar todo el historial por fecha
+    historial_completo = sorted(historial_completo, key=lambda x: x.fecha_cambio, reverse=True)[:15]
+    
     return render(request, 'proj/trazabilidad_completa.html', {
         'lote': lote,
         'transformaciones': transformaciones,
         'logisticas': logisticas,
-        'errores_validacion': errores_validacion
+        'errores_validacion': errores_validacion,
+        'historial_lote': historial_lote,
+        'historial_completo': historial_completo
     })
 
 

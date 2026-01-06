@@ -224,6 +224,64 @@
             </div>
         {% endif %}
 
+        <!-- Historial Completo de Cambios -->
+        {% if historial_completo %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="bi bi-clock-history"></i> Historial Completo de Cambios
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-3">Registro de todos los cambios realizados en esta trazabilidad:</p>
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Entidad</th>
+                                    <th>Acción</th>
+                                    <th>Campo</th>
+                                    <th>Cambio</th>
+                                    <th>Descripción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for registro in historial_completo %}
+                                    <tr>
+                                        <td>{{ registro.fecha_cambio|date:"d/m/Y H:i" }}</td>
+                                        <td>
+                                            <span class="badge bg-secondary">{{ registro.get_tipo_entidad_display }}</span>
+                                        </td>
+                                        <td>
+                                            <span class="badge 
+                                                {% if registro.accion == 'CREAR' %}bg-success
+                                                {% elif registro.accion == 'ACTUALIZAR' %}bg-info
+                                                {% else %}bg-danger
+                                                {% endif %}">
+                                                {{ registro.get_accion_display }}
+                                            </span>
+                                        </td>
+                                        <td>{{ registro.campo_modificado|default:"-" }}</td>
+                                        <td>
+                                            {% if registro.valor_anterior or registro.valor_nuevo %}
+                                                <small>
+                                                    <del class="text-danger">{{ registro.valor_anterior|default:"-"|truncatewords:3 }}</del>
+                                                    →
+                                                    <span class="text-success">{{ registro.valor_nuevo|default:"-"|truncatewords:3 }}</span>
+                                                </small>
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ registro.descripcion }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
         <div class="mt-4">
             <a href="{% url 'detalle_lote' lote.pk %}" class="btn btn-secondary">
                 <i class="bi bi-arrow-left"></i> Volver al Detalle

@@ -10,9 +10,14 @@
                 <h1 class="mb-2"><i class="bi bi-seedling"></i> Detalle del Lote</h1>
                 <p class="text-muted mb-0">Código: <strong>{{ lote.codigo_lote }}</strong></p>
             </div>
-            <a href="{% url 'trazabilidad_completa' lote.pk %}" class="btn btn-primary">
-                <i class="bi bi-diagram-3"></i> Ver Trazabilidad Completa
-            </a>
+            <div class="d-flex gap-2">
+                <a href="{% url 'editar_lote' lote.pk %}" class="btn btn-warning">
+                    <i class="bi bi-pencil"></i> Editar Lote
+                </a>
+                <a href="{% url 'trazabilidad_completa' lote.pk %}" class="btn btn-primary">
+                    <i class="bi bi-diagram-3"></i> Ver Trazabilidad Completa
+                </a>
+            </div>
         </div>
 
         <!-- Información del Lote -->
@@ -31,10 +36,100 @@
                         <p><strong>Área:</strong> {{ lote.area_hectareas }} hectáreas</p>
                         <p><strong>Fecha de Cosecha:</strong> {{ lote.fecha_cosecha }}</p>
                         <p><strong>Responsable:</strong> {{ lote.responsable }}</p>
+                        {% if lote.es_organico %}
+                            <p><span class="badge bg-success"><i class="bi bi-check-circle"></i> Producto Orgánico</span></p>
+                        {% endif %}
+                    </div>
+                </div>
+                {% if lote.certificaciones %}
+                    <hr>
+                    <p><strong>Certificaciones:</strong></p>
+                    <p class="text-muted">{{ lote.certificaciones }}</p>
+                {% endif %}
+                {% if lote.latitud and lote.longitud %}
+                    <hr>
+                    <p><strong>Coordenadas GPS:</strong> {{ lote.latitud }}, {{ lote.longitud }}</p>
+                    <a href="https://www.google.com/maps?q={{ lote.latitud }},{{ lote.longitud }}" 
+                       target="_blank" 
+                       class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-geo-alt"></i> Ver en Google Maps
+                    </a>
+                {% endif %}
+                <hr>
+                <div class="row">
+                    <div class="col-md-6">
+                        <small class="text-muted">
+                            <i class="bi bi-calendar-plus"></i> <strong>Creado:</strong> {{ lote.fecha_creacion|date:"d/m/Y H:i" }}
+                        </small>
+                    </div>
+                    <div class="col-md-6">
+                        <small class="text-muted">
+                            <i class="bi bi-clock-history"></i> <strong>Última actualización:</strong> {{ lote.fecha_actualizacion|date:"d/m/Y H:i" }}
+                        </small>
                     </div>
                 </div>
             </div>
         </div>
+
+        <!-- Historial de Auditoría del Lote -->
+        {% if historial_lote %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="bi bi-clock-history"></i> Historial de Cambios - Lote
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Acción</th>
+                                    <th>Campo</th>
+                                    <th>Cambio</th>
+                                    <th>Descripción</th>
+                                    <th>Usuario/IP</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for registro in historial_lote %}
+                                    <tr>
+                                        <td>{{ registro.fecha_cambio|date:"d/m/Y H:i" }}</td>
+                                        <td>
+                                            <span class="badge 
+                                                {% if registro.accion == 'CREAR' %}bg-success
+                                                {% elif registro.accion == 'ACTUALIZAR' %}bg-info
+                                                {% else %}bg-danger
+                                                {% endif %}">
+                                                {{ registro.get_accion_display }}
+                                            </span>
+                                        </td>
+                                        <td>{{ registro.campo_modificado|default:"-" }}</td>
+                                        <td>
+                                            {% if registro.valor_anterior or registro.valor_nuevo %}
+                                                <small>
+                                                    <del class="text-danger">{{ registro.valor_anterior|default:"-" }}</del>
+                                                    →
+                                                    <span class="text-success">{{ registro.valor_nuevo|default:"-" }}</span>
+                                                </small>
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ registro.descripcion }}</td>
+                                        <td>
+                                            <small>
+                                                {% if registro.usuario %}{{ registro.usuario }}<br>{% endif %}
+                                                {% if registro.ip_address %}<code>{{ registro.ip_address }}</code>{% endif %}
+                                            </small>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
 
         <!-- Transformaciones -->
         <div class="card mb-4">
@@ -77,6 +172,38 @@
                     </div>
                 {% else %}
                     <p class="text-muted">No hay transformaciones registradas para este lote.</p>
+                {% endif %}
+                
+                <!-- Historial de Transformaciones -->
+                {% if historial_transformaciones %}
+                    {% for item in historial_transformaciones %}
+                        {% if item.historial %}
+                            <hr>
+                            <h6>Historial - Transformación {{ item.transformacion.id }}</h6>
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Fecha</th>
+                                            <th>Acción</th>
+                                            <th>Descripción</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for reg in item.historial %}
+                                            <tr>
+                                                <td>{{ reg.fecha_cambio|date:"d/m/Y H:i" }}</td>
+                                                <td>
+                                                    <span class="badge bg-info">{{ reg.get_accion_display }}</span>
+                                                </td>
+                                                <td>{{ reg.descripcion }}</td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
                 {% endif %}
             </div>
         </div>
@@ -139,6 +266,58 @@
                     </div>
                 {% else %}
                     <p class="text-muted">No hay logísticas registradas para este lote.</p>
+                {% endif %}
+                
+                <!-- Historial de Logísticas -->
+                {% if historial_logisticas %}
+                    {% for item in historial_logisticas %}
+                        {% if item.historial %}
+                            <hr>
+                            <h6>Historial - Logística {{ item.logistica.numero_guia }}</h6>
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Fecha</th>
+                                            <th>Acción</th>
+                                            <th>Campo</th>
+                                            <th>Cambio</th>
+                                            <th>Descripción</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for reg in item.historial %}
+                                            <tr>
+                                                <td>{{ reg.fecha_cambio|date:"d/m/Y H:i" }}</td>
+                                                <td>
+                                                    <span class="badge 
+                                                        {% if reg.accion == 'CREAR' %}bg-success
+                                                        {% elif reg.accion == 'ACTUALIZAR' %}bg-info
+                                                        {% else %}bg-danger
+                                                        {% endif %}">
+                                                        {{ reg.get_accion_display }}
+                                                    </span>
+                                                </td>
+                                                <td>{{ reg.campo_modificado|default:"-" }}</td>
+                                                <td>
+                                                    {% if reg.valor_anterior or reg.valor_nuevo %}
+                                                        <small>
+                                                            <del class="text-danger">{{ reg.valor_anterior|default:"-" }}</del>
+                                                            →
+                                                            <span class="text-success">{{ reg.valor_nuevo|default:"-" }}</span>
+                                                        </small>
+                                                    {% else %}
+                                                        -
+                                                    {% endif %}
+                                                </td>
+                                                <td>{{ reg.descripcion }}</td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
                 {% endif %}
             </div>
         </div>

@@ -27,6 +27,7 @@
                             <th>Cantidad</th>
                             <th>Control Calidad</th>
                             <th>Resultado</th>
+                            <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -46,6 +47,13 @@
                                         {% endif %}">
                                         {{ trans.get_resultado_calidad_display }}
                                     </span>
+                                </td>
+                                <td>
+                                    <a href="{% url 'editar_transformacion' trans.pk %}" 
+                                       class="btn btn-sm btn-warning" 
+                                       title="Editar transformación">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
                                 </td>
                             </tr>
                         {% endfor %}

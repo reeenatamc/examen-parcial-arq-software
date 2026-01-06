@@ -40,10 +40,13 @@
                                 <td>{{ lote.responsable }}</td>
                                 <td>
                                     <div class="d-flex gap-2">
-                                        <a href="{% url 'detalle_lote' lote.pk %}" class="btn btn-sm btn-info">
+                                        <a href="{% url 'detalle_lote' lote.pk %}" class="btn btn-sm btn-info" title="Ver detalle">
                                             <i class="bi bi-eye"></i>
                                         </a>
-                                        <a href="{% url 'trazabilidad_completa' lote.pk %}" class="btn btn-sm btn-primary">
+                                        <a href="{% url 'editar_lote' lote.pk %}" class="btn btn-sm btn-warning" title="Editar lote">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <a href="{% url 'trazabilidad_completa' lote.pk %}" class="btn btn-sm btn-primary" title="Ver trazabilidad">
                                             <i class="bi bi-diagram-3"></i>
                                         </a>
                                     </div>
