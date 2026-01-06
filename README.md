@@ -35,6 +35,9 @@ El proyecto está organizado siguiendo una arquitectura de 3 capas estricta:
 - Templates HTML para la interfaz de usuario
 - Integración con Bootstrap para una UI moderna
 
+<img width="736" height="301" alt="imagen" src="https://github.com/user-attachments/assets/0757c332-4c68-4309-8cc1-4a283e77c31d" />
+
+
 ## 🚀 Requisitos Previos
 
 - Python 3.8 o superior
